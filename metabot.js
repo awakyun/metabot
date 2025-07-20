@@ -9,7 +9,7 @@ document.body.background="https://pbs.twimg.com/media/GObDNLcaEAAy_Zg?format=jpg
 blCnt=0;kiCnt=0;
 const api1 = "https://script.google.com/macros/s/AKfycbzAAP_AVEth_ElF5gxRzfFIQCSFAI1FX-Sultv_3ubJpyko2z8TceF_5fcOh_5ixXQ/exec";
 const api2 = "https://script.google.com/macros/s/AKfycbyvNNMgtC7af8r30Kd5nl5jF0itPeKqOUMWPTDkTkrjJLckwSP14D0s5kmsE2lxrgYsYA/exec";
-const zinroAPI = "https://zinro.net/m/api/?mode=message&id";
+const url = "https://zinro.net/m/api/?mode=message&id";
 const rdymsg = ["tinpo"];
 
 document.body.innerHTML = "";
