@@ -1,4 +1,3 @@
-javascript:
 document.title = "’・。.Meta bot👾.。・’";mdk=0;
 GASURL="https://script.google.com/macros/s/AKfycbxTbwMVq9z_cevgrRmNMkHhlRwlnxNT9K93mT8GWNyqmBu_OLwAZKdeqPCkRP676WX7/exec?";
 MSGGASURL="https://script.google.com/macros/s/AKfycbxwKDs_3N1L1NbisBYeGnXW932s8n0Ux7r7iu9Njjk9T41Ffz7SXXARoMmrVO3LLz76Qw/exec?msg=";
@@ -8,17 +7,72 @@ apiText3=JSON.parse(localStorage.getItem("plData"));
 document.body.innerHTML="";Master="◆Awakun.0rvDl";
 document.body.background="https://pbs.twimg.com/media/GObDNLcaEAAy_Zg?format=jpg&name=large";
 blCnt=0;kiCnt=0;
-setBase1='<p style="background-color:black;opacity:0.7;width: fit-content;border-radius: 5px 5px 5px 5px;" id="zako"><font size="3" color="white">(. .　)now loading...</font></p>
-<input type="button" value="発言" style="margin:0px;background-color:black;opacity:0.5;color:white;border-radius: 5px 5px 5px 5px;" onclick="mmssgg=document.getElementById(\'msgInput\').value.replace(/　/g,\' \');if(mmssgg!==\'\'){fetch(\'https://script.google.com/macros/s/AKfycbzAAP_AVEth_ElF5gxRzfFIQCSFAI1FX-Sultv_3ubJpyko2z8TceF_5fcOh_5ixXQ/exec?msg=\'+mmssgg);document.getElementById(\'msgInput\').value=\'\';cls=\'mmssgg\';iro=\'white\';document.getElementById(\'Hbox\').innerHTML=\'<p class=\'+cls+\'><font color=\'+iro+\'>あわ(\'+Master+\')\'+\'「\'+mmssgg+\'」</font></p>\'+document.getElementById(\'Hbox\').innerHTML;}">　<input type="button" style="margin:0px;background-color:black;opacity:0.5;color:white;border-radius: 5px 5px 5px 5px;" value="蹴りコマンド" onclick="javascript:document.getElementById(\'msgInput\').value=\'$kick \'+saigoPL;"><br>
-%3Ctextarea id="msgInput" style="width:1450px;height:100px;margin:0px;background-color:black;opacity:0.5;color:white;border-radius: 5px 5px 5px 5px;" class="dede"></textarea><input type="button" onclick="javascript:if(document.getElementById(\'msgInput\').value!==\'\'){document.cFrame.location.href = document.getElementById(\'msgInput\').value;}else{document.cFrame.location.href = \'https://www.google.com/?igu=1\';}" value="◎" id="mBtn"><div id="Hbox">';
-setBase2='</div><br><style>.dede{float:right;}#msgInput{float:left;}#Hbox{float:left;margin: 0px 0px 0px 30px;}#mBtn{float:right;}</style>';
-rdymsg=["tinpo"];
-api2='https://script.google.com/macros/s/AKfycbyvNNMgtC7af8r30Kd5nl5jF0itPeKqOUMWPTDkTkrjJLckwSP14D0s5kmsE2lxrgYsYA/exec';
-var url='https://zinro.net/m/api/?mode=message&id';
-document.body.innerHTML=setBase1+setBase2;
-document.getElementById("Hbox").style.overflow="scroll";
-document.getElementById("Hbox").style.width="1421px";
-document.getElementById("Hbox").style.height="550px";
+const api1 = "https://script.google.com/macros/s/AKfycbzAAP_AVEth_ElF5gxRzfFIQCSFAI1FX-Sultv_3ubJpyko2z8TceF_5fcOh_5ixXQ/exec";
+const api2 = "https://script.google.com/macros/s/AKfycbyvNNMgtC7af8r30Kd5nl5jF0itPeKqOUMWPTDkTkrjJLckwSP14D0s5kmsE2lxrgYsYA/exec";
+const zinroAPI = "https://zinro.net/m/api/?mode=message&id";
+const rdymsg = ["tinpo"];
+
+document.body.innerHTML = "";
+
+const zakoP = document.createElement("p");
+zakoP.id = "zako";
+zakoP.style = "background-color:black;opacity:0.7;width: fit-content;border-radius: 5px;";
+zakoP.innerHTML = '<font size="3" color="white">(. .　)now loading...</font>';
+document.body.appendChild(zakoP);
+
+const sendBtn = document.createElement("input");
+sendBtn.type = "button";
+sendBtn.value = "発言";
+sendBtn.style = "margin:0px;background-color:black;opacity:0.5;color:white;border-radius:5px;";
+sendBtn.onclick = () => {
+  let mmssgg = document.getElementById("msgInput").value.replace(/　/g, ' ');
+  if (mmssgg !== '') {
+    fetch(`${api1}?msg=${encodeURIComponent(mmssgg)}`);
+    document.getElementById("msgInput").value = '';
+    const cls = 'mmssgg';
+    const iro = 'white';
+    const hbox = document.getElementById("Hbox");
+    hbox.innerHTML = `<p class="${cls}"><font color="${iro}">あわ(${Master})「${mmssgg}」</font></p>` + hbox.innerHTML;
+  }
+};
+document.body.appendChild(sendBtn);
+
+const kickBtn = document.createElement("input");
+kickBtn.type = "button";
+kickBtn.value = "蹴りコマンド";
+kickBtn.style = "margin:0px;background-color:black;opacity:0.5;color:white;border-radius:5px;";
+kickBtn.onclick = () => {
+  document.getElementById("msgInput").value = `$kick ${saigoPL}`;
+};
+document.body.appendChild(kickBtn);
+
+document.body.appendChild(document.createElement("br"));
+
+const textarea = document.createElement("textarea");
+textarea.id = "msgInput";
+textarea.className = "dede";
+textarea.style = "width:1450px;height:100px;margin:0px;background-color:black;opacity:0.5;color:white;border-radius:5px;float:left;";
+document.body.appendChild(textarea);
+
+const execBtn = document.createElement("input");
+execBtn.type = "button";
+execBtn.id = "mBtn";
+execBtn.value = "◎";
+execBtn.style = "float:right;";
+execBtn.onclick = () => {
+  const msg = document.getElementById("msgInput").value;
+  if (msg !== '') {
+    document.cFrame.location.href = msg;
+  } else {
+    document.cFrame.location.href = 'https://www.google.com/?igu=1';
+  }
+};
+document.body.appendChild(execBtn);
+
+const hboxDiv = document.createElement("div");
+hboxDiv.id = "Hbox";
+hboxDiv.style = "float:left;margin: 0px 0px 0px 30px;overflow:scroll;width:1421px;height:550px;";
+document.body.appendChild(hboxDiv);
 
 fetch(MSGGASURL+sName+"起動しました。");
 
