@@ -1,4 +1,5 @@
-document.title = "’・。.Meta bot👾.。・’";mdk=0;
+document.title = "’・。.Meta bot👾.。・’";mdk=0;alter=0;
+ALURL = 'https://script.google.com/macros/s/AKfycbwdM06YAG_vCTdUozid1ZVg4EAPegw7W5YQTAFDLB1C2QG2q4JHUZt4LzNIbcbgzOoV/exec?text=';
 GASURL="https://script.google.com/macros/s/AKfycbxTbwMVq9z_cevgrRmNMkHhlRwlnxNT9K93mT8GWNyqmBu_OLwAZKdeqPCkRP676WX7/exec?";
 MSGGASURL="https://script.google.com/macros/s/AKfycbxwKDs_3N1L1NbisBYeGnXW932s8n0Ux7r7iu9Njjk9T41Ffz7SXXARoMmrVO3LLz76Qw/exec?msg=";
 clean="あ\n\nわ\n\nひ\n\nら\n\nバ\n\nブ\n\nル\n\n";rmCnt=0;beMax="";msgLen=0;hatuCnt=0;logSpeed="-";saigoPL="";
@@ -127,6 +128,17 @@ if (from=='鯖' && msg.indexOf('さんが入室しました')!==-1){
 	}
 }
 
+if(alter==1&&apiText3.adTrip.includes(trpC) !== true&&isMs=Master.includes(trpC) !== true){
+	fetch(ALURL+encodeURIComponent(msg)).then(function(response) {
+	    return response.text();}).then(function(text) {
+		if(text.indexOf("アウト")!==-1){
+			idk=apiText2.players[from].id;
+			if(apiText3.bTrip.includes(trpC) !== true && trpC!==""){apiText3.bTrip.push(trpC);}
+			fetch(GASURL+"kid="+idk);fetch(MSGGASURL+sName+"(´・ω・｀)");
+		}
+	    });
+}
+	
 if(msg=='$admin list'&&isAd){
 	fetch(MSGGASURL+sName+"admin listには\n"+apiText3.adTrip.length+"人の管理者がいます。");
 }
@@ -218,6 +230,14 @@ if(msg.indexOf("$ai ")!==-1&&isAd){
 	    });
 }
 
+if(msg==("$alter")&&isAd&&alter==0){
+	alter=1;
+	fetch(MSGGASURL+sName+'Alterパッチが適用されました。これより、AIによって自動で村管理されます。');
+}
+if(msg==("$alter stop")&&isAd&&alter==1){
+	alter=0;
+	fetch(MSGGASURL+sName+'Alterパッチが解除されました。');
+}
 
 }
 n=n-1;}
