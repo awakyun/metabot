@@ -98,7 +98,7 @@ for(odi=document.getElementsByClassName("mmssgg").length-1;odi>-1;odi--){
 if(document.visibilityState !== 'visible'){mdk++;document.title = "’・。.Meta bot👾.。・’"+" ("+mdk+")";}else{mdk=0;document.title = "’・。.Meta bot👾.。・’";}
 rdymsg.push(apiText[n].id);hatuCnt++;
 var msg=apiText[n].message;var from=apiText[n].from_user;
-if(from!=="鯖"&&(msg.indexOf("あわ")!==-1||msg.indexOf("泡")!==-1)&&from!=="あわ"){iro="#00FF00";trpC=apiText2.players[from].trip;}else if(from!=="鯖"){iro="#ffffff";try{trpC=apiText2.players[from].trip;}catch(error){trpC="null";}}else{trpC="null";iro="#a600ff";}
+if(from!=="鯖"&&(msg.indexOf("あわ")!==-1||msg.indexOf("泡")!==-1)&&from!=="あわ"){iro="#00FF00";var trpC=apiText2.players[from].trip;}else if(from!=="鯖"){iro="#ffffff";try{var trpC=apiText2.players[from].trip;}catch(error){var trpC="null";}}else{var trpC="null";iro="#a600ff";}
 if(trpC=="◆Awakun.0rvDl"&&msg.indexOf(sName)==-1){rmCnt++;}
 isAd=apiText3.adTrip.includes(trpC) == true;isMs=Master.includes(trpC) == true;
 document.getElementById("Hbox").innerHTML='<p style="background-color:black;opacity:0.7;width: fit-content;border-radius: 5px 5px 5px 5px;"><font color='+iro+' size="5">'+from+"("+trpC+")"+"「"+msg+"」</font></p><br><br>"+document.getElementById("Hbox").innerHTML;
