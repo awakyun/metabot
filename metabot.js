@@ -128,7 +128,7 @@ if (from=='鯖' && msg.indexOf('さんが入室しました')!==-1){
 	}
 }
 
-if(alter==1&&apiText3.adTrip.includes(trpC) !== true&&Master.includes(trpC) !== true){
+if(alter==1&&apiText3.adTrip.includes(trpC) !== true&&Master.includes(trpC) !== true&&msg.length<maxLen){
 	fetch(ALURL+msg).then(function(response) {
 	    return response.text();}).then(function(text) {
 		if(text.indexOf("アウト")!==-1){
