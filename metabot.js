@@ -254,7 +254,7 @@ if(timeCnt>30){
 }timeCnt++;
 if(rmCnt!==0&&beMax!==""){maxLen=beMax;beMax="";}
 
-};  var tm = 1502;setInterval(fn,tm);
+};  var tm = 1700;setInterval(fn,tm);
 function xhrSet(){
 	xhr.open('POST', 'https://zinro.net/m/player.php');
 	xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
