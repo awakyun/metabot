@@ -128,10 +128,10 @@ if (from=='鯖' && msg.indexOf('さんが入室しました')!==-1){
 	}
 }
 
-if(alter==1&&apiText3.adTrip.includes(trpC) !== true&&Master.includes(trpC) !== true && maxLen>msg.length){
+if(alter==1&&apiText3.adTrip.includes(trpC) !== true&&Master !== trpC && maxLen>msg.length){
 	fetch(ALURL+msg).then(function(response) {
 	    return response.text();}).then(function(text) {
-		if(text.indexOf("アウト")!==-1){
+		if(text.indexOf("アウト")!==-1&&apiText3.adTrip.includes(trpC) !== true&&Master !== trpC &&from!=="あわ"){
 			idk=apiText2.players[from].id;
 			if(apiText3.bTrip.includes(trpC) !== true && trpC!==""){apiText3.bTrip.push(trpC);}
 			fetch(GASURL+"kid="+idk);fetch(MSGGASURL+sName+"(´・ω・｀)");
