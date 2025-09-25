@@ -28,7 +28,7 @@ sendBtn.style = "margin:0px;background-color:black;opacity:0.5;color:white;borde
 sendBtn.onclick = () => {
   mmssgg = document.getElementById("msgInput").value.replace(/　/g, ' ');
   if (mmssgg !== '') {
-    fetch(`${api1}?msg=${encodeURIComponent(mmssgg)}`);
+    fetch(MSGGASURL+mmssgg);
     document.getElementById("msgInput").value = '';
     cls = 'mmssgg';
     iro = 'white';
