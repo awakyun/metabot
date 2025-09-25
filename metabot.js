@@ -15,30 +15,30 @@ const rdymsg = ["tinpo"];
 
 document.body.innerHTML = "";
 
-const zakoP = document.createElement("p");
+zakoP = document.createElement("p");
 zakoP.id = "zako";
 zakoP.style = "background-color:black;opacity:0.7;width: fit-content;border-radius: 5px;";
 zakoP.innerHTML = '<font size="3" color="white">(. .　)now loading...</font>';
 document.body.appendChild(zakoP);
 
-const sendBtn = document.createElement("input");
+sendBtn = document.createElement("input");
 sendBtn.type = "button";
 sendBtn.value = "発言";
 sendBtn.style = "margin:0px;background-color:black;opacity:0.5;color:white;border-radius:5px;";
 sendBtn.onclick = () => {
-  let mmssgg = document.getElementById("msgInput").value.replace(/　/g, ' ');
+  mmssgg = document.getElementById("msgInput").value.replace(/　/g, ' ');
   if (mmssgg !== '') {
     fetch(`${api1}?msg=${encodeURIComponent(mmssgg)}`);
     document.getElementById("msgInput").value = '';
-    const cls = 'mmssgg';
-    const iro = 'white';
-    const hbox = document.getElementById("Hbox");
+    cls = 'mmssgg';
+    iro = 'white';
+    hbox = document.getElementById("Hbox");
     hbox.innerHTML = `<p class="${cls}"><font color="${iro}">あわ(${Master})「${mmssgg}」</font></p>` + hbox.innerHTML;
   }
 };
 document.body.appendChild(sendBtn);
 
-const kickBtn = document.createElement("input");
+kickBtn = document.createElement("input");
 kickBtn.type = "button";
 kickBtn.value = "蹴りコマンド";
 kickBtn.style = "margin:0px;background-color:black;opacity:0.5;color:white;border-radius:5px;";
