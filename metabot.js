@@ -128,16 +128,31 @@ if (from=='鯖' && msg.indexOf('さんが入室しました')!==-1){
 	}
 }
 
-if(alter==1&&apiText3.adTrip.includes(trpC) !== true&&Master !== trpC && maxLen>msg.length){
-	fetch(ALURL+msg).then(function(response) {
-	    return response.text();}).then(function(text) {
-		if(text.indexOf("アウト")!==-1&&apiText3.adTrip.includes(trpC) !== true&&Master !== trpC &&from!=="あわ"){
-			idk=apiText2.players[from].id;
-			if(apiText3.bTrip.includes(trpC) !== true && trpC!==""){apiText3.bTrip.push(trpC);}
-			fetch(GASURL+"kid="+idk);fetch(MSGGASURL+sName+"(´・ω・｀)");
-		}
-	    });
+if (alter==1 && apiText3.adTrip.includes(trpC) !== true && Master !== trpC && maxLen > msg.length) {
+
+  const localFrom = from;
+  const localMsg  = msg;
+  const localTrpC = trpC;
+
+  fetch(ALURL + encodeURIComponent(localMsg))
+    .then(res => res.text())
+    .then(text => {
+      if (
+        text.indexOf("アウト") !== -1 &&
+        apiText3.adTrip.includes(localTrpC) !== true &&
+        Master !== localTrpC &&
+        localFrom !== "あわ"
+      ) {
+        const idk = apiText2.players[localFrom].id;
+        if (apiText3.bTrip.includes(localTrpC) !== true && localTrpC !== "") {
+          apiText3.bTrip.push(localTrpC);
+        }
+        fetch(GASURL + "kid=" + idk);
+        fetch(MSGGASURL + sName + "(´・ω・｀)");
+      }
+    });
 }
+
 	
 if(msg=='$admin list'&&isAd){
 	fetch(MSGGASURL+sName+"admin listには\n"+apiText3.adTrip.length+"人の管理者がいます。");
