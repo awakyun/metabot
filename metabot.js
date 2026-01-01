@@ -221,15 +221,6 @@ if(msg==('$help')){
 if(msg.indexOf("$info ")!==-1 && isAd){infoSrch(msg.replace('$info ', ''),1);}
 if(msg.indexOf("$infobn ")!==-1 && isAd){infoSrch(msg.replace('$infobn ', ''),0);}
 
-if(msg.indexOf("$ai ")!==-1&&isAd){
-	trsM="https://script.google.com/macros/s/AKfycbz3CM8sdK9NLCfupcHf85-UcpGaCSWAyxfJk1AU-rJKcGJPiq9VmucEe4SLsqPzr8UuYQ/exec?msg=";
-	AIMsg=msg.replace("$ai ","");trsM=trsM+"これは君あてのメッセージです→「"+AIMsg+"」 レスポンスは120文字以内で、一人称は「あわ」で、ツンデレ口調で返して！";
-	fetch(trsM).then(function(response) {
-	    return response.text();}).then(function(text) {
-	      fetch(MSGGASURL+sName+text.replace(/\\n/g," ").replace(/"/g,"").replace(/\*/g,"").replace(/120文字/g,""));
-	    });
-}
-
 if(msg==("$alter")&&isAd&&alter==0){
 	alter=1;
 	fetch(MSGGASURL+sName+'Alterパッチが適用されました。これより、AIによって自動で村管理されます。');
