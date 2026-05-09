@@ -1,299 +1,555 @@
-document.title = "’・。.Meta bot👾.。・’";mdk=0;alter=0;
-ALURL = 'https://script.google.com/macros/s/AKfycbwdM06YAG_vCTdUozid1ZVg4EAPegw7W5YQTAFDLB1C2QG2q4JHUZt4LzNIbcbgzOoV/exec?text=';
-GASURL="https://script.google.com/macros/s/AKfycbxTbwMVq9z_cevgrRmNMkHhlRwlnxNT9K93mT8GWNyqmBu_OLwAZKdeqPCkRP676WX7/exec?";
-MSGGASURL="https://script.google.com/macros/s/AKfycbxwKDs_3N1L1NbisBYeGnXW932s8n0Ux7r7iu9Njjk9T41Ffz7SXXARoMmrVO3LLz76Qw/exec?msg=";
-clean="あ\n\nわ\n\nひ\n\nら\n\nバ\n\nブ\n\nル\n\n";rmCnt=0;beMax="";msgLen=0;hatuCnt=0;logSpeed="-";saigoPL="";
-xhr = new XMLHttpRequest();sName="[ⴜeta(. . )☑️]";maxLen=150;timeCnt=0;
-apiText3=JSON.parse(localStorage.getItem("plData"));
-document.body.innerHTML="";Master="◆Awakun.0rvDl";
-document.body.background="https://pbs.twimg.com/media/GObDNLcaEAAy_Zg?format=jpg&name=large";
-blCnt=0;kiCnt=0;
-const api1 = "https://script.google.com/macros/s/AKfycbzAAP_AVEth_ElF5gxRzfFIQCSFAI1FX-Sultv_3ubJpyko2z8TceF_5fcOh_5ixXQ/exec";
-const api2 = "https://script.google.com/macros/s/AKfycbyvNNMgtC7af8r30Kd5nl5jF0itPeKqOUMWPTDkTkrjJLckwSP14D0s5kmsE2lxrgYsYA/exec";
-const url = "https://zinro.net/m/api/?mode=message&id";
-const rdymsg = ["tinpo"];
+(() => {
 
-document.body.innerHTML = "";
+// =====================
+// 定数
+// =====================
 
-zakoP = document.createElement("p");
-zakoP.id = "zako";
-zakoP.style = "background-color:black;opacity:0.7;width: fit-content;border-radius: 5px;";
-zakoP.innerHTML = '<font size="3" color="white">(. .　)now loading...</font>';
-document.body.appendChild(zakoP);
+const BOT      = "[ℳeta bot]";
+const PREFIXES = ["$", "!"];
+const API      = "https://ss1.xrea.com/zinrostats.s205.xrea.com/log_search";
+const MAX_LEN  = 240;
+const MASTER   = "◆Awakun.0rvDl";
 
-sendBtn = document.createElement("input");
-sendBtn.type = "button";
-sendBtn.value = "発言";
-sendBtn.style = "margin:0px;background-color:black;opacity:0.5;color:white;border-radius:5px;";
-sendBtn.onclick = () => {
-  mmssgg = document.getElementById("msgInput").value.replace(/　/g, ' ');
-  if (mmssgg !== '') {
-    fetch(MSGGASURL+mmssgg);
-    document.getElementById("msgInput").value = '';
-    cls = 'mmssgg';
-    iro = 'white';
-    hbox = document.getElementById("Hbox");
-    hbox.innerHTML = `<p class="${cls}"><font color="${iro}">あわ(${Master})「${mmssgg}」</font></p>` + hbox.innerHTML;
+// GAS エンドポイント（Gemini APIキーローテーションはGAS側で管理）
+const GAS_URL  = "https://script.google.com/macros/s/AKfycbwdM06YAG_vCTdUozid1ZVg4EAPegw7W5YQTAFDLB1C2QG2q4JHUZt4LzNIbcbgzOoV/exec";
+
+// alter クールダウン（ms）- 連続リクエスト抑制
+const ALTER_COOLDOWN = 4000;
+
+// タイ文字など荒らし判定文字
+const NG_CHARS = [
+  "็","่","้","๊","๋","์","ํ","ฺ","ู","ุ","ื","ึ","ี","ิ",
+  "ࣚ","ࣛ","ࣜ","ࣝ","ࣞ"
+];
+
+// =====================
+// state
+// =====================
+
+const state = {
+  processed  : new Set(),
+  queue      : [],
+  sending    : false,
+  alter      : false,
+  lastAlterAt: 0,
+
+  // plData（永続化DB）
+  db: (() => {
+    const saved = localStorage.getItem("plData");
+    if (saved) return JSON.parse(saved);
+    return { adTrip: [], bTrip: [], banName: [], NGwrd: [], maxLen: 150 };
+  })(),
+
+  // meta_cfg（admin設定）
+  config: (() => {
+    const saved = localStorage.getItem("meta_cfg");
+    if (saved) return JSON.parse(saved);
+    return { adminTrips: [MASTER] };
+  })()
+};
+
+// =====================
+// utils
+// =====================
+
+const prefix   = (t) => PREFIXES.find(p => t.startsWith(p));
+const normTrip = (t) => (t || "").replace(/^◆/, "");
+const showTrip = (t) => `◆${normTrip(t)}`;
+
+function saveDB() {
+  localStorage.setItem("plData", JSON.stringify(state.db));
+}
+
+// =====================
+// player
+// g_players の構造: { [id]: { id, name, trip, ... } }
+// =====================
+
+const P = {
+  get(name) {
+    for (const key of Object.keys(g_players)) {
+      const p = g_players[key];
+      if (p && typeof p === "object" && p.name === name) return p;
+    }
+    return null;
   }
 };
-document.body.appendChild(sendBtn);
 
-kickBtn = document.createElement("input");
-kickBtn.type = "button";
-kickBtn.value = "蹴りコマンド";
-kickBtn.style = "margin:0px;background-color:black;opacity:0.5;color:white;border-radius:5px;";
-kickBtn.onclick = () => {
-  document.getElementById("msgInput").value = `$kick ${saigoPL}`;
-};
-document.body.appendChild(kickBtn);
+// =====================
+// 権限チェック
+// =====================
 
-document.body.appendChild(document.createElement("br"));
+function isAdmin(name) {
+  const p = P.get(name);
+  if (!p) return false;
+  return state.db.adTrip.includes(p.trip) ||
+         state.config.adminTrips.includes(p.trip);
+}
 
-const textarea = document.createElement("textarea");
-textarea.id = "msgInput";
-textarea.className = "dede";
-textarea.style = "width:1450px;height:100px;margin:0px;background-color:black;opacity:0.5;color:white;border-radius:5px;float:left;";
-document.body.appendChild(textarea);
+function isMaster(name) {
+  const p = P.get(name);
+  if (!p) return false;
+  return p.trip === MASTER;
+}
 
-const execBtn = document.createElement("input");
-execBtn.type = "button";
-execBtn.id = "mBtn";
-execBtn.value = "◎";
-execBtn.style = "float:right;";
-execBtn.onclick = () => {
-  const msg = document.getElementById("msgInput").value;
-  if (msg !== '') {
-    document.cFrame.location.href = msg;
+// =====================
+// send（安定キュー）
+// =====================
+
+async function send(text) {
+  const msg = (BOT + text).slice(0, MAX_LEN);
+  state.queue.push(msg);
+  if (state.sending) return;
+  state.sending = true;
+  while (state.queue.length) {
+    const m = state.queue.shift();
+    try {
+      await fetch(
+        `/m/player.php?mode=message&to_user=ALL&message=${encodeURIComponent(m)}`,
+        { credentials: "include" }
+      );
+    } catch(e) {}
+    await new Promise(r => setTimeout(r, 1200));
+  }
+  state.sending = false;
+}
+
+// =====================
+// kick
+// =====================
+
+async function kickPlayer(targetName) {
+  const p = P.get(targetName);
+  if (!p) {
+    await send(`Error: ${targetName} は存在しません。`);
+    return;
+  }
+  if (isAdmin(targetName)) {
+    await send(`Error: 管理者はkickできません。`);
+    return;
+  }
+  const id   = String(p.id);
+  const trip = p.trip || "";
+  if (trip && trip !== "非公開" && !state.db.bTrip.includes(trip)) {
+    state.db.bTrip.push(trip);
+  }
+  await fetch(
+    `https://zinro.net/m/player.php?kick=${id}&name=${encodeURIComponent(targetName)}`,
+    { credentials: "include" }
+  );
+  await send("粛聖！あわビ――――ムwwwww");
+}
+
+// =====================
+// Gemini（GAS経由）
+// =====================
+
+async function callGemini(msg) {
+  try {
+    const url = GAS_URL + "?text=" + encodeURIComponent(msg);
+    const res = await fetch(url);
+    if (!res.ok) return "";
+    return (await res.text()).trim();
+  } catch(e) {
+    return "";
+  }
+}
+
+// =====================
+// alter（AI自動モデレート）
+// =====================
+
+async function runAlter(from, msg, trip) {
+  if (!state.alter) return;
+  if (isAdmin(from)) return;
+  if (trip === MASTER) return;
+
+  const now = Date.now();
+  if (now - state.lastAlterAt < ALTER_COOLDOWN) return;
+  state.lastAlterAt = now;
+
+  try {
+    const result = await callGemini(msg);
+    if (result.indexOf("アウト") !== -1) {
+      await kickPlayer(from);
+      await send("(´・ω・｀)");
+    }
+  } catch(e) {}
+}
+
+// =====================
+// 自動モデレート
+// =====================
+
+async function autoModerate(from, msg, trip) {
+  if (isAdmin(from)) return;
+
+  // NGワード
+  for (const w of state.db.NGwrd) {
+    if (msg.indexOf(w) !== -1) {
+      await kickPlayer(from);
+      return;
+    }
+  }
+
+  // 長文
+  if (msg.length >= state.db.maxLen) {
+    await kickPlayer(from);
+    return;
+  }
+
+  // タイ文字等
+  if (NG_CHARS.some(c => msg.indexOf(c) !== -1)) {
+    await kickPlayer(from);
+    return;
+  }
+
+  // AI判定（alter ON時のみ）
+  await runAlter(from, msg, trip);
+}
+
+// =====================
+// 入室処理
+// =====================
+
+async function onEnter(newPL) {
+  const p = P.get(newPL);
+  if (!p) return;
+  const id   = String(p.id);
+  const trip = p.trip || "";
+
+  // BANトリップ
+  if (state.db.bTrip.includes(trip)) {
+    await fetch(
+      `https://zinro.net/m/player.php?kick=${id}&name=${encodeURIComponent(newPL)}`,
+      { credentials: "include" }
+    );
+    return;
+  }
+
+  // BAN名前
+  for (const bn of state.db.banName) {
+    if (newPL.indexOf(bn) !== -1 && !isAdmin(newPL)) {
+      if (trip && !state.db.bTrip.includes(trip)) state.db.bTrip.push(trip);
+      await fetch(
+        `https://zinro.net/m/player.php?kick=${id}&name=${encodeURIComponent(newPL)}`,
+        { credentials: "include" }
+      );
+      return;
+    }
+  }
+
+  // 挨拶
+  if (state.db.adTrip.includes(trip) || state.config.adminTrips.includes(trip)) {
+    await send(`おかえりなさいませ、${newPL}(${trip})様。`);
   } else {
-    document.cFrame.location.href = 'https://www.google.com/?igu=1';
+    await send(`こんにちは、${newPL}(${trip})さん。`);
   }
-};
-document.body.appendChild(execBtn);
-
-const hboxDiv = document.createElement("div");
-hboxDiv.id = "Hbox";
-hboxDiv.style = "float:left;margin: 0px 0px 0px 30px;overflow:scroll;width:1421px;height:550px;";
-document.body.appendChild(hboxDiv);
-
-fetch(MSGGASURL+sName+"起動しました。");
-
-var fn = function() {
-
-fetch(url).then(function(response) {
- return response.text();}).then(function(text) {
-apiText=JSON.parse(text);
-fetch(api2).then(function(response) {
- return response.text();
-}).then(function(text2) {
-apiText2=JSON.parse(text2);
-
-document.getElementById("zako").innerHTML='<font size="3" color="white">(. .　)入室者: '+Object.keys(apiText2.players).length+'人, 無敵化時刻: '+String(Number(apiText2.player.created.substr(11,2))+4)+apiText2.player.created.substr(13,19)+', ログ速さ: '+logSpeed+'[logs/min]'+'</font>';
-
-n=10;while(n>-1){
-
-if(rdymsg.includes(apiText[n].id)!==true){
-for(odi=document.getElementsByClassName("mmssgg").length-1;odi>-1;odi--){
-	document.getElementsByClassName("mmssgg")[odi].remove();
-}
-if(document.visibilityState !== 'visible'){mdk++;document.title = "’・。.Meta bot👾.。・’"+" ("+mdk+")";}else{mdk=0;document.title = "’・。.Meta bot👾.。・’";}
-rdymsg.push(apiText[n].id);hatuCnt++;
-var msg=apiText[n].message;var from=apiText[n].from_user;
-if(from!=="鯖"&&(msg.indexOf("あわ")!==-1||msg.indexOf("泡")!==-1)&&from!=="あわ"){iro="#00FF00";var trpC=apiText2.players[from].trip;}else if(from!=="鯖"){iro="#ffffff";try{var trpC=apiText2.players[from].trip;}catch(error){var trpC="null";}}else{var trpC="null";iro="#a600ff";}
-if(trpC=="◆Awakun.0rvDl"&&msg.indexOf(sName)==-1){rmCnt++;}
-isAd=apiText3.adTrip.includes(trpC) == true;isMs=Master.includes(trpC) == true;
-document.getElementById("Hbox").innerHTML='<p style="background-color:black;opacity:0.7;width: fit-content;border-radius: 5px 5px 5px 5px;"><font color='+iro+' size="5">'+from+"("+trpC+")"+"「"+msg+"」</font></p><br><br>"+document.getElementById("Hbox").innerHTML;
-
-
-if (from=='鯖' && msg.indexOf('さんが入室しました')!==-1){
-	newPL=msg.replace('さんが入室しました', '');cmTrip=apiText2.players[newPL].trip;trpC=cmTrip;saigoPL=newPL;
-	if(apiText3.bTrip.includes(cmTrip) == true||newPL.indexOf("ﾗﾌｨ")!==-1||newPL.indexOf("ラフィ")!==-1){
-		fetch(GASURL+"kid="+apiText2.players[newPL].id);
-	}else{
-		Wcnt=0;idk="N";
-		while(Wcnt<apiText3.banName.length){
-			if(newPL.indexOf(apiText3.banName[Wcnt])!==-1&&apiText3.adTrip.includes(trpC) !== true){
-				idk=apiText2.players[newPL].id;
-				if(apiText3.bTrip.includes(trpC) !== true && trpC!==""){apiText3.bTrip.push(trpC);}
-				fetch(GASURL+"kid="+idk);
-			}
-			Wcnt++;
-		}
-		if(idk=="N"){
-			if(apiText3.adTrip.includes(cmTrip)){
-				fetch(MSGGASURL+sName+"おかえりなさいませ、"+newPL+"("+cmTrip+")様。");
-			}else{
-				fetch(MSGGASURL+sName+"こんにちは、"+newPL+"("+cmTrip+")さん。");
-			}
-		}
-	}
 }
 
-if (alter==1 && apiText3.adTrip.includes(trpC) !== true && Master !== trpC && maxLen > msg.length) {
+// =====================
+// ログ分析
+// =====================
 
-  const localFrom = from;
-  const localMsg  = msg;
-  const localTrpC = trpC;
+async function fetchLogs(param) {
+  const res  = await fetch(API + "?" + param);
+  const json = await res.json();
+  if (json.error) return [];
+  return json.log_data || [];
+}
 
-  fetch(ALURL + encodeURIComponent(localMsg))
-    .then(res => res.text())
-    .then(text => {
-      if (
-        text.indexOf("アウト") !== -1 &&
-        apiText3.adTrip.includes(localTrpC) !== true &&
-        Master !== localTrpC &&
-        localFrom !== "あわ"
-      ) {
-        const idk = apiText2.players[localFrom].id;
-        if (apiText3.bTrip.includes(localTrpC) !== true && localTrpC !== "") {
-          apiText3.bTrip.push(localTrpC);
-        }
-        fetch(GASURL + "kid=" + idk);
-        fetch(MSGGASURL + sName + "(´・ω・｀)");
+function makeBlocks(hour, total) {
+  return [
+    [0,6],[6,12],[12,18],[18,24]
+  ].map(([a,b]) => {
+    const sum = hour.slice(a,b).reduce((x,y) => x+y, 0);
+    const bar = "█".repeat(Math.max(1, Math.round(sum / Math.max(total,1) * 10)));
+    return `${String(a).padStart(2,"0")}-${String(b).padStart(2,"0")}: ${bar}`;
+  });
+}
+
+function analyzeByName(logs, targetName) {
+  const tripMap = {};
+  const hour    = new Array(24).fill(0);
+  for (const l of logs) {
+    const d = new Date(l.date);
+    if (!isNaN(d)) hour[d.getHours()]++;
+    for (const p of l.players) {
+      if (p.name !== targetName) continue;
+      const t = normTrip(p.trip);
+      if (!t) continue;
+      tripMap[t] = (tripMap[t] || 0) + 1;
+    }
+  }
+  const topTrips = Object.entries(tripMap)
+    .sort((a,b) => b[1]-a[1]).slice(0,3)
+    .map(([t,c]) => `${showTrip(t)}:${c}`);
+  return { topTrips, hour };
+}
+
+function analyzeByTrip(logs, targetTrip) {
+  const nameMap = {};
+  const hour    = new Array(24).fill(0);
+  const t0      = normTrip(targetTrip);
+  for (const l of logs) {
+    const d = new Date(l.date);
+    if (!isNaN(d)) hour[d.getHours()]++;
+    for (const p of l.players) {
+      if (normTrip(p.trip) !== t0) continue;
+      nameMap[p.name] = (nameMap[p.name] || 0) + 1;
+    }
+  }
+  const topNames = Object.entries(nameMap)
+    .sort((a,b) => b[1]-a[1]).slice(0,3)
+    .map(([n,c]) => `${n}:${c}`);
+  return { topNames, hour };
+}
+
+function formatName(name, logs, a) {
+  return [
+    `${name}`, `logs:${logs.length}`,
+    `T: ${a.topTrips.join(" ")}`, `act:`,
+    ...makeBlocks(a.hour, logs.length)
+  ].join("\n");
+}
+
+function formatTrip(trip, logs, a) {
+  return [
+    `${showTrip(trip)}`, `logs:${logs.length}`,
+    `U: ${a.topNames.join(" ")}`, `act:`,
+    ...makeBlocks(a.hour, logs.length)
+  ].join("\n");
+}
+
+// =====================
+// コマンドハンドラ
+// =====================
+
+const commands = [
+
+  // info / infobn
+  {
+    match: cmd => cmd.startsWith("info ") || cmd.startsWith("infobn "),
+    run: async (cmd, from) => {
+      if (!isAdmin(from)) return;
+      const arg  = cmd.split(" ").slice(1).join(" ");
+      const logs = arg.startsWith("◆")
+        ? await fetchLogs("trip=" + encodeURIComponent(arg))
+        : await fetchLogs("name=" + encodeURIComponent(arg));
+      if (!logs.length) { await send(`${arg} not found`); return; }
+      if (arg.startsWith("◆")) {
+        await send(formatTrip(arg, logs, analyzeByTrip(logs, arg)));
+      } else {
+        await send(formatName(arg, logs, analyzeByName(logs, arg)));
       }
-    });
-}
+    }
+  },
 
-	
-if(msg=='$admin list'&&isAd){
-	fetch(MSGGASURL+sName+"admin listには\n"+apiText3.adTrip.length+"人の管理者がいます。");
-}
+  // kick
+  {
+    match: cmd => cmd.startsWith("kick "),
+    run: async (cmd, from) => {
+      if (!isAdmin(from)) return;
+      await kickPlayer(cmd.slice(5).trim());
+    }
+  },
 
-if(msg.indexOf('$addmin ')!==-1&&isMs){
-	addPL=msg.replace('$addmin ','');
-	if(apiText3.adTrip.indexOf(addPL)!==-1){fetch(MSGGASURL+sName+"トリップ: "+addPL+"はadmin list上にすでに存在します。");}else{apiText3.adTrip.push(addPL);fetch(MSGGASURL+sName+"トリップ: "+addPL+"に管理者権限を付与しました。");}
-}
+  // ban
+  {
+    match: cmd => cmd.startsWith("ban "),
+    run: async (cmd, from) => {
+      if (!isMaster(from)) return;
+      const name = cmd.slice(4).trim();
+      state.db.banName.push(name);
+      await send(`${name} の入室を禁止しました。`);
+    }
+  },
 
-if(msg.indexOf('$remadmin ')!==-1&&isMs){remPL=msg.replace('$remadmin ','');apiText3.adTrip=apiText3.adTrip.filter(function(v){return ! remPL.includes(v);});
-	fetch(MSGGASURL+sName+"トリップ: "+remPL+"から管理者権限を剥奪しました。");}
+  // addmin
+  {
+    match: cmd => cmd.startsWith("addmin "),
+    run: async (cmd, from) => {
+      if (!isMaster(from)) return;
+      const trip = cmd.slice(7).trim();
+      if (state.db.adTrip.includes(trip)) {
+        await send(`${trip} はすでに管理者です。`);
+      } else {
+        state.db.adTrip.push(trip);
+        await send(`${trip} に管理者権限を付与しました。`);
+      }
+    }
+  },
 
-if(msg.indexOf('$rembt ')!==-1&&isMs){remPL=msg.replace('$rembt ','');apiText3.bTrip=apiText3.bTrip.filter(function(v){return ! remPL.includes(v);});
-	fetch(MSGGASURL+sName+remPL+"をbantripから削除しました。");}
+  // remadmin
+  {
+    match: cmd => cmd.startsWith("remadmin "),
+    run: async (cmd, from) => {
+      if (!isMaster(from)) return;
+      const trip = cmd.slice(9).trim();
+      state.db.adTrip = state.db.adTrip.filter(t => t !== trip);
+      await send(`${trip} から管理者権限を剥奪しました。`);
+    }
+  },
 
-if(msg.indexOf('$rembn ')!==-1&&isMs){remPL=msg.replace('$rembn ','');apiText3.banName=apiText3.banName.filter(function(v){return ! remPL.includes(v);});
-	fetch(MSGGASURL+sName+remPL+"をbannameから削除しました。");}
+  // rembt
+  {
+    match: cmd => cmd.startsWith("rembt "),
+    run: async (cmd, from) => {
+      if (!isMaster(from)) return;
+      const trip = cmd.slice(6).trim();
+      state.db.bTrip = state.db.bTrip.filter(t => t !== trip);
+      await send(`${trip} をBanTripから削除しました。`);
+    }
+  },
 
-if(msg.indexOf('$addwrd ')!==-1&&isMs){
-	addwrd=msg.replace('$addwrd ','');
-	apiText3.NGwrd.push(addwrd);fetch(MSGGASURL+sName+addwrd+"を禁止ワードに追加しました。");
-}
+  // rembn
+  {
+    match: cmd => cmd.startsWith("rembn "),
+    run: async (cmd, from) => {
+      if (!isMaster(from)) return;
+      const name = cmd.slice(6).trim();
+      state.db.banName = state.db.banName.filter(n => n !== name);
+      await send(`${name} をBanNameから削除しました。`);
+    }
+  },
 
-if(msg.indexOf('$remwrd ')!==-1&&isMs){remPL=msg.replace('$remwrd ','');apiText3.NGwrd=apiText3.NGwrd.filter(function(v){return ! remPL.includes(v);});
-	fetch(MSGGASURL+sName+remPL+"を禁止ワードから削除しました。");}
+  // addwrd
+  {
+    match: cmd => cmd.startsWith("addwrd "),
+    run: async (cmd, from) => {
+      if (!isMaster(from)) return;
+      const word = cmd.slice(7).trim();
+      state.db.NGwrd.push(word);
+      await send(`「${word}」を禁止ワードに追加しました。`);
+    }
+  },
 
-if(msg=="$save all" && isMs){localStorage.setItem("plData",JSON.stringify(apiText3));fetch(MSGGASURL+sName+"変更内容をセーブしました。");}
+  // remwrd
+  {
+    match: cmd => cmd.startsWith("remwrd "),
+    run: async (cmd, from) => {
+      if (!isMaster(from)) return;
+      const word = cmd.slice(7).trim();
+      state.db.NGwrd = state.db.NGwrd.filter(w => w !== word);
+      await send(`「${word}」を禁止ワードから削除しました。`);
+    }
+  },
 
-if (msg.indexOf('$cmd ')!==-1&&isAd){
-	xhrSet();cmdA=msg.replace("$cmd ","").replace(/amp;/g,"");xhr.send(cmdA);
-}
+  // maxlen
+  {
+    match: cmd => cmd.startsWith("maxlen "),
+    run: async (cmd, from) => {
+      if (!isAdmin(from)) return;
+      const len = Number(cmd.slice(7).trim());
+      if (!isNaN(len) && len > 0) {
+        state.db.maxLen = len;
+        await send(`${len} 文字以上の発言を規制します。`);
+      }
+    }
+  },
 
-if(msg.indexOf('$script ')!==-1&&isMs){eval(msg.replace('$script ',''));}
+  // alter / alter stop
+  {
+    match: cmd => cmd === "alter" || cmd === "alter stop",
+    run: async (cmd, from) => {
+      if (!isAdmin(from)) return;
+      if (cmd === "alter" && !state.alter) {
+        state.alter = true;
+        await send("Alterパッチが適用されました。AIによる自動モデレートを開始します。");
+      } else if (cmd === "alter stop" && state.alter) {
+        state.alter = false;
+        await send("Alterパッチが解除されました。");
+      }
+    }
+  },
 
-if(msg.indexOf('$ban ')!==-1&&isMs){
-	addPL=msg.replace('$ban ','');
-	apiText3.banName.push(addPL);fetch(MSGGASURL+sName+addPL+"の入室を禁止しました。");
-}
+  // save all
+  {
+    match: cmd => cmd === "save all",
+    run: async (cmd, from) => {
+      if (!isMaster(from)) return;
+      saveDB();
+      await send("変更内容をセーブしました。");
+    }
+  },
 
-if(msg.indexOf('$kick ')!==-1&&isAd){
-kikPL=msg.replace('$kick ','');
-	try{
-	if(apiText3.adTrip.includes(apiText2.players[kikPL].trip) !== true){
-	idk=apiText2.players[kikPL].id;btrip=apiText2.players[kikPL].trip;if(btrip!=="非公開" && apiText3.bTrip.includes(btrip) !== true && btrip!=="")	{apiText3.bTrip.push(btrip);}
-	fetch(GASURL+"kid="+idk);fetch(MSGGASURL+sName+"粛聖！あわビ――――ムwwwww");}
-	}catch(error){fetch(MSGGASURL+sName+"Error: kickを試みましたが、その名前のプレイヤーは存在しません。");}
-}
+  // admin list
+  {
+    match: cmd => cmd === "admin list",
+    run: async (cmd, from) => {
+      if (!isAdmin(from)) return;
+      const all = [...new Set([...state.db.adTrip, ...state.config.adminTrips])];
+      await send(`admins: ${all.length}人`);
+    }
+  },
 
-if (msg.length >= maxLen&&apiText3.adTrip.includes(trpC) !== true) {
-idk=apiText2.players[from].id;
-if(apiText3.bTrip.includes(trpC) !== true && trpC!==""){apiText3.bTrip.push(trpC);}
-fetch(GASURL+"kid="+idk);fetch(MSGGASURL+sName+"粛聖！あわビ――――ムwwwww");
-}
+  // script（masterのみ）
+  {
+    match: cmd => cmd.startsWith("script "),
+    run: async (cmd, from) => {
+      if (!isMaster(from)) return;
+      try { eval(cmd.slice(7)); } catch(e) { await send(`script error: ${e.message}`); }
+    }
+  },
 
-if(msg.indexOf("็")!==-1||msg.indexOf("่")!==-1||msg.indexOf("้")!==-1||msg.indexOf("๊")!==-1||msg.indexOf("๋")!==-1||msg.indexOf("์")!==-1||msg.indexOf("ํ")!==-1||msg.indexOf("ฺ")!==-1||msg.indexOf("ู")!==-1||msg.indexOf("ุ")!==-1||msg.indexOf("ื")!==-1||msg.indexOf("ึ")!==-1||msg.indexOf("ี")!==-1||msg.indexOf("ิ")!==-1||msg.indexOf("ࣚ")!==-1||msg.indexOf("ࣛ")!==-1||msg.indexOf("ࣜ")!==-1||msg.indexOf("ࣝ")!==-1||msg.indexOf("ࣞ")!==-1){
-	if(apiText3.adTrip.includes(trpC)!==true){
-		idk=apiText2.players[from].id;
-		if(apiText3.bTrip.includes(trpC) !== true && trpC!==""){apiText3.bTrip.push(trpC);}
-		fetch(GASURL+"kid="+idk);fetch(MSGGASURL+sName+"粛聖！あわビ――――ムwwwww");
-	}
-}
+  // help
+  {
+    match: cmd => cmd === "help",
+    run: async (cmd, from) => {
+      await send("botのhelpはここにあります→https://1145141919.wiki.fc2.com/wiki/bothelp");
+    }
+  },
 
-Wcnt=0;
-while(Wcnt<apiText3.NGwrd.length){
-if(msg.indexOf(apiText3.NGwrd[Wcnt])!==-1&&apiText3.adTrip.includes(trpC) !== true){
-idk=apiText2.players[from].id;
-if(apiText3.bTrip.includes(trpC) !== true && trpC!==""){apiText3.bTrip.push(trpC);}fetch(GASURL+"kid="+idk);fetch(MSGGASURL+sName+"粛聖！あわビ――――ムwwwww");}
-Wcnt++;
-}
+];
 
-if(msg.indexOf('$maxlen ')!==-1&&isAd){
-maxLen=msg.replace('$maxlen ','');
-fetch(MSGGASURL+sName+maxLen+'文字以上の発言を規制します。');
-}
+// =====================
+// hook（コア）
+// =====================
 
-if(msg==('$help')){
-	fetch(MSGGASURL+sName+"botのhelpはここにあります→https://1145141919.wiki.fc2.com/wiki/bothelp");
-}
+const original = g_message_json.push;
 
-if(msg.indexOf("$info ")!==-1 && isAd){infoSrch(msg.replace('$info ', ''),1);}
-if(msg.indexOf("$infobn ")!==-1 && isAd){infoSrch(msg.replace('$infobn ', ''),0);}
+g_message_json.push = async function(...msgs) {
 
-if(msg==("$alter")&&isAd&&alter==0){
-	alter=1;
-	fetch(MSGGASURL+sName+'Alterパッチが適用されました。これより、AIによって自動で村管理されます。');
-}
-if(msg==("$alter stop")&&isAd&&alter==1){
-	alter=0;
-	fetch(MSGGASURL+sName+'Alterパッチが解除されました。');
-}
+  for (const m of msgs) {
 
-}
-n=n-1;}
+    if (!m?.id) continue;
+    if (state.processed.has(m.id)) continue;
+    state.processed.add(m.id);
 
-});});
+    const text = m.message;
+    const from = m.from_user;
 
-if(timeCnt>30){
-	logSpeed=Math.round(hatuCnt*10)/10;
-	if(rmCnt==0&&beMax==""){
-		beMax=maxLen;
-		maxLen="100";
-	}
-	localStorage.setItem("plData",JSON.stringify(apiText3));timeCnt=0;rmCnt=0;hatuCnt=0;
-}timeCnt++;
-if(rmCnt!==0&&beMax!==""){maxLen=beMax;beMax="";}
+    if (!text) continue;
 
-};  var tm = 1700;setInterval(fn,tm);
-function xhrSet(){
-	xhr.open('POST', 'https://zinro.net/m/player.php');
-	xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-}
+    // 入室検知
+    if (from === "鯖" && text.indexOf("さんが入室しました") !== -1) {
+      const newPL = text.replace("さんが入室しました", "");
+      await onEnter(newPL);
+      continue;
+    }
 
-function infoSrch(seaInfo,frg){
-	var e = new XMLHttpRequest();
-	if(frg==0){target="name";tg2="trip";tgTxt="トリップ";seaInfoCns="name="+seaInfo;}else{target="trip";tg2="name";tgTxt="名前";seaInfoCns="trip="+seaInfo;}
-	e.open('GET', 'https://ss1.xrea.com/zinrostats.s205.xrea.com/log_search?'+seaInfoCns);
-	e.responseType = 'json';
-	e.send();
-	e.onload = function () {
-		var infoArr=[];
-		infoRes=e.response;
-		if(infoRes.error==""){
-		for(infoCnt=0;infoCnt<infoRes.log_data.length;infoCnt++){
-			plList=infoRes.log_data[infoCnt].players;
-			for(var infoCnt2=0;infoCnt2<plList.length;infoCnt2++){
-				if(plList[infoCnt2][target]==seaInfo){
-					if(infoArr.includes(plList[infoCnt2][tg2])!==true&&plList[infoCnt2][tg2]!==""){
-						infoArr.push(plList[infoCnt2][tg2]);
-					}
-				}
-			}
-		}
-		logNum="発見されたログ: "+infoRes.log_data.length+"件";
-		if(infoArr.length!==1){
-			ofName=infoArr[0]+"や"+infoArr[1]+"などの"+tgTxt+"を使用しており";
-		}else{
-			ofName=infoArr[0]+"などの"+tgTxt+"を使用しており";
-		}
-		seizon=infoRes.log_data[infoRes.log_data.length-1].date+"から"+infoRes.log_data[0].date+"までの生存が確認されました。";
-		fetch(MSGGASURL+sName+logNum+"\n"+ofName+"\n"+seizon);
-		}else{fetch(MSGGASURL+sName+"存在しない、または不正なリクエスト");}
-	}
-}
+    // 自動モデレート
+    const sender = P.get(from);
+    const trip   = sender?.trip || "";
+    await autoModerate(from, text, trip);
+
+    // コマンド判定
+    const pfx = prefix(text);
+    if (!pfx) continue;
+
+    const cmd = text.slice(pfx.length).trim();
+
+    for (const handler of commands) {
+      if (handler.match(cmd)) {
+        await handler.run(cmd, from);
+        break;
+      }
+    }
+  }
+
+  return original.apply(this, msgs);
+};
+
+console.log("[ℳeta bot] loaded ✓");
+
+})();
