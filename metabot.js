@@ -1,4 +1,4 @@
-document.getElementById("message").style.backgroundColor="navy";
+document.getElementById("message").style.backgroundColor="#556b7c";
 
 (() => {
 
