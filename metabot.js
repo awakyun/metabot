@@ -215,8 +215,20 @@ async function autoModerate(from, msg, trip) {
 // =====================
 
 async function onEnter(newPL) {
-  const p = P.get(newPL);
-  if (!p) return;
+  // g_players への反映を最大3秒待つ（入室直後は未登録のことがある）
+  let p = null;
+  for (let i = 0; i < 6; i++) {
+    p = P.get(newPL);
+    if (p) break;
+    await new Promise(r => setTimeout(r, 500));
+  }
+
+  // それでも見つからない場合はトリップなしで挨拶だけ送る
+  if (!p) {
+    await send(`こんにちは、${newPL}さん。`);
+    return;
+  }
+
   const id   = String(p.id);
   const trip = p.trip || "";
 
