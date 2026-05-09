@@ -7,7 +7,7 @@ document.getElementById("message").style.backgroundColor="#556b7c";
 // 定数
 // =====================
 
-const BOT      = "[Meta bot( . .　)✅]";
+const BOT      = "[ℳeta bot]";
 const PREFIXES = ["$", "!"];
 const API      = "https://ss1.xrea.com/zinrostats.s205.xrea.com/log_search";
 const MAX_LEN  = 240;
@@ -114,6 +114,7 @@ async function send(text) {
     } catch(e) {}
     await new Promise(r => setTimeout(r, 1200));
   }
+  saveDB();
   state.sending = false;
 }
 
