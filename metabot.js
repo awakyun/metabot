@@ -567,5 +567,6 @@ g_message_json.push = async function(...msgs) {
 };
 
 console.log("[ℳeta bot] loaded ✓");
+send("- 起動完了 -");
 
 })();
