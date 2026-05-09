@@ -1,3 +1,4 @@
+//起動がわかりやすいように色付け
 document.getElementById("message").style.backgroundColor="#556b7c";
 
 (() => {
@@ -6,7 +7,7 @@ document.getElementById("message").style.backgroundColor="#556b7c";
 // 定数
 // =====================
 
-const BOT      = "[Meta bot( . .　)✅]";
+const BOT      = "[ℳeta bot]";
 const PREFIXES = ["$", "!"];
 const API      = "https://ss1.xrea.com/zinrostats.s205.xrea.com/log_search";
 const MAX_LEN  = 240;
@@ -184,6 +185,7 @@ async function runAlter(from, msg, trip) {
 // =====================
 
 async function autoModerate(from, msg, trip) {
+  if (from === "鯖") return;
   if (isAdmin(from)) return;
 
   // NGワード
